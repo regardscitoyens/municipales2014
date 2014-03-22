@@ -1,0 +1,19 @@
+{
+  "name": "municipales2014",
+  "version": "0.0.0",
+  "authors": [
+    "François Massot <francois.massot@gmail.com>"
+  ],
+  "description": "municipales 2014",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "topojson": "~1.5.1"
+  }
+}
