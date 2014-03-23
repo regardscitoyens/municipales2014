@@ -26,6 +26,9 @@ data/france.topojson: data/places.json data/departments.json
 	topojson --id-property SU_A3 -p name=nom -p code=code_insee -o data/france.topojson data/departments.json
 # data/places.json
 
+all: data/france.topojson data/participation_history.csv
+
+
 clean:
 	rm data/departements-20140306-100m-shp.*
 	rm data/populated_places.*
