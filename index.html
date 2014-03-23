@@ -13,29 +13,49 @@
       opacity: 1;
       stroke-width: 1.5;
     }
+    .ticks {
+      font: 10px sans-serif;
+    }
+    .caption {
+      font: 14px sans-serif;
+    }
   </style>
   </head>
   <body>
     <div class="container">
       <div class="row">
-        <div class="row">
-        <label><input type="radio" name="mode" value="2007_12h">2007 à 12h</label>
-        <label><input type="radio" name="mode" value="2007_17h">2007 à 17h</label>
-        <label><input type="radio" name="mode" value="2012_12h">2012 à 12h</label>
-        <label><input type="radio" name="mode" value="2012_17h" checked>2012 à 17h</label>
-        <label><input type="radio" name="mode" value="2014_12h">2014 à 12h</label>
-      </div>
+        <div class="radio-inline">
+          <label>
+            <input type="radio" value="2012_12h" name="optionsRadios" checked> 2012 à 12h
+          </label>
+        </div>
+        <div class="radio-inline">
+          <label>
+            <input type="radio" value="2014_12h" name="optionsRadios"> 2014 à 12h
+          </label>
+        </div>
       </div>
       <div id="map"></div>
       <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
       <script src="./js/francedom.js"></script>
       <script src="http://d3js.org/topojson.v1.min.js"></script>
       <script type="text/javascript">
-        var valueAttr = '2012_17h'
+        var valueAttr = '2012_12h'
+        var xAt12h = d3.scale.linear()
+            .domain([20, 40])
+            .range([10, 260]);
+        var xAxisAt12h = d3.svg.axis()
+          .scale(xAt12h)
+          .orient("bottom")
+          .tickSize(2)
+          .ticks(8)
+          .tickFormat(function(d) {
+              return d3.format(".0f")(d) + '%';
+          });
         var colorScales = {};
         var participationData = {};
         var color = d3.scale.linear()
-          .domain([0, 50, 100])
+          .domain([20, 30, 40])
           .range(["#4575b4", "#ffffbf", "#a50026"])
           .interpolate(d3.interpolateHcl);
         var tooltip = d3.select(document.createElement('div'))
@@ -44,22 +64,43 @@
           .style("display", 'none');
         var format = d3.format("0,000");
         document.body.appendChild(tooltip.node());
-        var width = 1000, height = 550;
+        var width = 700, height = 550;
         var path = d3.geo.path();
         var projection = d3.geo.conicConformal() // Lambert-93
                 .center([2.454071, 47.279229])
                 .scale(3000)
                 .translate([width / 2, height / 2]);
-        var projection = d3.geo.franceDom().showPolynesie(false);
+        var projection = d3.geo.franceDom().showPolynesie(false).translate([width / 2, height / 2]);
+
         path.projection(projection);
 
         var svg = d3.select("#map").append("svg")
           .attr("width", width)
           .attr("height", height);
 
+        svg.selectAll("rect")
+          .data(pair(xAt12h.ticks(8)))
+        .enter().append("rect")
+          .attr("height", 8)
+          .attr("y", 20)
+          .attr("x", function(d) { return xAt12h(d[0]) + 10; })
+          .attr("width", function(d) { return xAt12h(d[1]) - xAt12h(d[0]); })
+          .style("fill", function(d) { return color(d[0]); });
+        function pair(array) {
+          return array.slice(1).map(function(b, i) {
+            return [array[i], b];
+          });
+        }
+          svg.append('g').attr("transform", "translate(10,27)")
+            .attr("class", "ticks")
+            .call(xAxisAt12h)
+            .append("text")
+            .attr("y", -15)
+            .attr("x", 10)
+            .text("Taux de participation en %");
+
           d3.json('./data/france.topojson', function(error, departments) {
               d3.dsv(";", "text/plain")("./data/participation_history.csv", function(error, data) {
-                // Make something with dat
                 data.forEach(function(row) {
                   if (participationData[row.code_dep]!=null) {
                     participationData[row.code_dep][row.nom] = +row.taux_participation;
@@ -70,15 +111,21 @@
 
                 // Add departments
                 var features = topojson.feature(departments, departments.objects.departments).features;
-                var map =svg.selectAll(".department")
+                var map = svg.selectAll(".department")
                   .data(features)
                   .enter().append("path")
                   .attr('class', 'department')
                   .attr("fill", function(d) { return color(participationData[d.properties.code][valueAttr]); })
                   .on("mouseover", function(d, i) {
+                    var participation;
+                    if (participationData[d.properties.code][valueAttr]) {
+                      participation =  participationData[d.properties.code][valueAttr] + ' %';
+                      } else {
+                      participation = "Aucune info disponible";
+                      }
                     var text = "<div class='popover-content'> <b>" +
                     d.properties.name + ' (' + d.properties.code + ')' +
-                      " : " + participationData[d.properties.code][valueAttr] + " %";
+                      " : " + participation;
                       "</b></div>";
                     tooltip.html(text);
                     tooltip.style("left", d3.event.pageX + 10 + "px");
@@ -95,7 +142,7 @@
                 map.data(features)
                   .transition()
                   .duration(1500)
-                  .attr("fill", function(d) { console.log(d); return color(participationData[d.properties.code][valueAttr]); });
+                  .attr("fill", function(d) { return color(participationData[d.properties.code][valueAttr]); });
               });
             });
           });
