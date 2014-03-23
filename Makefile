@@ -5,6 +5,9 @@ data/participation_history.csv:
 	rm header_participation.csv
 	rm participation.csv
 
+data/participation.csv: data/participation_history.csv data/participation_municipales2014.csv
+	cat data/participation_history.csv data/participation_municipales2014.csv > data/participation.csv
+
 data/departements-20140306-100m.shp:
 	wget http://osm13.openstreetmap.fr/~cquest/openfla/export/departements-20140306-100m-shp.zip
 	unzip -u departements-20140306-100m-shp.zip -d data

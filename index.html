@@ -107,7 +107,7 @@
             .text("Taux de participation en %");
 
           d3.json('./data/france.topojson', function(error, departments) {
-              d3.dsv(";", "text/plain")("./data/participation_history.csv", function(error, data) {
+              d3.dsv(";", "text/plain")("./data/participation.csv", function(error, data) {
                 data.forEach(function(row) {
                   if (participationData[row.code_dep]!=null) {
                     participationData[row.code_dep][row.nom] = +row.taux_participation;
