@@ -16,7 +16,7 @@ data/populated_places.shp:
 	mv ne_10m_populated_places.* data/
 	rm data/ne_10m_populated_places.zip
 
-data/places.json: data/ne_10m_populated_places.shp
+data/places.json: data/populated_places.shp
 	ogr2ogr -f GeoJSON -where "ISO_A2 = 'FR' AND SCALERANK < 8" data/places.json data/ne_10m_populated_places.shp
 
 data/departments.json: data/departements-20140306-100m-shp/departements-20140306-100m.shp
