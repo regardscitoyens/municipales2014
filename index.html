@@ -18,14 +18,26 @@
   <body>
     <div class="container">
       <div class="row">
+        <div class="row">
+        <label><input type="radio" name="mode" value="2007_12h">2007 à 12h</label>
+        <label><input type="radio" name="mode" value="2007_17h">2007 à 17h</label>
+        <label><input type="radio" name="mode" value="2012_12h">2012 à 12h</label>
+        <label><input type="radio" name="mode" value="2012_17h" checked>2012 à 17h</label>
+        <label><input type="radio" name="mode" value="2014_12h">2014 à 12h</label>
+      </div>
       </div>
       <div id="map"></div>
       <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
       <script src="./js/francedom.js"></script>
       <script src="http://d3js.org/topojson.v1.min.js"></script>
       <script type="text/javascript">
+        var valueAttr = '2012_17h'
         var colorScales = {};
-        var participationData;
+        var participationData = {};
+        var color = d3.scale.linear()
+          .domain([0, 50, 100])
+          .range(["#4575b4", "#ffffbf", "#a50026"])
+          .interpolate(d3.interpolateHcl);
         var tooltip = d3.select(document.createElement('div'))
           .append("div")
           .attr("class", "popover")
@@ -46,9 +58,15 @@
           .attr("height", height);
 
           d3.json('./data/france.topojson', function(error, departments) {
-              d3.csv("data/participation_history.csv", function(error, data) {
+              d3.dsv(";", "text/plain")("./data/participation_history.csv", function(error, data) {
                 // Make something with dat
-                participationData = data;
+                data.forEach(function(row) {
+                  if (participationData[row.code_dep]!=null) {
+                    participationData[row.code_dep][row.nom] = +row.taux_participation;
+                  } else {
+                    participationData[row.code_dep] = {}
+                  }
+                });
 
                 // Add departments
                 var features = topojson.feature(departments, departments.objects.departments).features;
@@ -56,10 +74,11 @@
                   .data(features)
                   .enter().append("path")
                   .attr('class', 'department')
-                  .attr("fill", function(d) { return "#DFDFDF"; })
+                  .attr("fill", function(d) { return color(participationData[d.properties.code][valueAttr]); })
                   .on("mouseover", function(d, i) {
                     var text = "<div class='popover-content'> <b>" +
-                          d.properties.name + ' (' + d.properties.code + ')' +
+                    d.properties.name + ' (' + d.properties.code + ')' +
+                      " : " + participationData[d.properties.code][valueAttr] + " %";
                       "</b></div>";
                     tooltip.html(text);
                     tooltip.style("left", d3.event.pageX + 10 + "px");
@@ -76,10 +95,10 @@
                 map.data(features)
                   .transition()
                   .duration(1500)
-                  .attr("fill", function(d) { return "#FFFFF"; });
+                  .attr("fill", function(d) { console.log(d); return color(participationData[d.properties.code][valueAttr]); });
               });
             });
-        });
+          });
       </script>
     </div>
   </body>

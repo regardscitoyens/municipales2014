@@ -1,6 +1,9 @@
 data/participation_history.csv:
 	wget http://komodo.regardscitoyens.org/public/presidentielles2012/historique/participation.csv
-	mv participation.csv data/participation_history.csv
+	echo "code_dep;taux_participation;nom" > header_participation.csv
+	cat header_participation.csv participation.csv > data/participation_history.csv
+	rm header_participation.csv
+	rm participation.csv
 
 data/departements-20140306-100m-shp.shp:
 	wget http://osm13.openstreetmap.fr/~cquest/openfla/export/departements-20140306-100m-shp.zip data/departements-20140306-100m-shp.zip
