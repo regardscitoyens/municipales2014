@@ -11,9 +11,10 @@ cd node-v0.10.26
 make
 sudo make install
 ```
-# GDAL
+# GDAL & TopoJson
 ```
 sudo apt-get install gdal-bin
+sudo npm install -g topojson
 ```
 
 ## Install
