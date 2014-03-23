@@ -20,8 +20,9 @@ data/places.json: data/populated_places.shp
 	ogr2ogr -f GeoJSON -where "ISO_A2 = 'FR' AND SCALERANK < 8" data/places.json data/ne_10m_populated_places.shp
 
 data/departments.json: data/departements-20140306-100m.shp
-	ogr2ogr -f GeoJSON data/departments.json data/departements-20140306-100m.shp
-
+	ogr2ogr -f GeoJSON data/departments.latin1.json data/departements-20140306-100m.shp
+	iconv -f latin1 -t utf8 data/departments.latin1.json > data/departments.json
+	rm data/departments.latin1.json
 data/france.topojson: data/places.json data/departments.json
 	topojson --id-property SU_A3 -p name=nom -p code=code_insee -o data/france.topojson data/departments.json
 
