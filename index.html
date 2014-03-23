@@ -54,10 +54,17 @@
           });
         var colorScales = {};
         var participationData = {};
-        var color = d3.scale.linear()
+        var d3color = d3.scale.linear()
           .domain([20, 30, 40])
           .range(["#4575b4", "#ffffbf", "#a50026"])
           .interpolate(d3.interpolateHcl);
+        function color(d) {
+          if (d!=null) {
+            return d3color(d);
+          } else {
+            return "rgb(206, 206, 206)";
+          }
+        }
         var tooltip = d3.select(document.createElement('div'))
           .append("div")
           .attr("class", "popover")
